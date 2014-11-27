@@ -85,6 +85,16 @@ _MOTORS = {'1' : {
 			}
 		}
 
+_OUTPUTS = {'1' : {
+			'PIN' : OUT1,
+			'PWM' : OUT1PWM      
+			},
+		'2' : {
+			'PIN' : OUT2,
+			'PWM' : OUT2PWM      
+			}
+		}
+
 # # Blink the Ready light, perfect first test
 def blink():
 	GPIO.output(READY, GPIO.LOW)
@@ -119,22 +129,19 @@ def motor1(value):
 def motor2(value):
 	_set_motor('2', value);
 
+def _set_output(index, value):
+	if value == True:
+		_OUTPUTS[index]['PWM'].ChangeDutyCycle(100)
+	elif value == int(value):
+		_OUTPUTS[index]['PWM'].ChangeDutyCycle(value)
+	else:
+		GPIO.output(_OUTPUTS[index]['PIN'], GPIO.LOW)
 
 def out1(value):
-	if value == True:
-		OUT1PWM.ChangeDutyCycle(100)
-	elif value == int(value):
-		OUT1PWM.ChangeDutyCycle(value)
-	else:
-		GPIO.output(OUT1, GPIO.LOW)
+	_set_output('1', value)
 
 def out2(value):
-	if value == True:
-		OUT2PWM.ChangeDutyCycle(100)
-	elif value == int(value):
-		OUT2PWM.ChangeDutyCycle(value)
-	else:
-		GPIO.output(OUT2, GPIO.LOW)
+	_set_output('2', value)
 
 def in1():
 	if GPIO.input(IN1):
