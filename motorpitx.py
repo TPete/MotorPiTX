@@ -26,7 +26,6 @@
 from time import sleep
 import RPi.GPIO as GPIO
 import os
-from random import randint
 
 print "Setting up pins"
 
@@ -46,7 +45,6 @@ if GPIO.RPI_REVISION == 1:
 	IN1 = 21
 else:
 	IN1 = 27
-#IN1 = 27
 IN2 = 4
 SERVO1 = 18
 SERVO2 = 15
@@ -65,92 +63,61 @@ GPIO.setup(IN2, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(SERVO1, GPIO.OUT, initial=GPIO.LOW)
 GPIO.setup(SERVO2, GPIO.OUT, initial=GPIO.LOW)
 
-MOTAPWM = GPIO.PWM(MOTAE,100)
+MOTAPWM = GPIO.PWM(MOTAE, 100)
 MOTAPWM.start(0)
-MOTBPWM = GPIO.PWM(MOTBE,100)
+MOTBPWM = GPIO.PWM(MOTBE, 100)
 MOTBPWM.start(0)
 
-OUT1PWM = GPIO.PWM(OUT1,100)
+OUT1PWM = GPIO.PWM(OUT1, 100)
 OUT1PWM.start(0)
-OUT2PWM = GPIO.PWM(OUT2,100)
+OUT2PWM = GPIO.PWM(OUT2, 100)
 OUT2PWM.start(0)
 
-## Blink the Ready light, perfect first test
+_MOTORS = {'1' : {
+			'1' : MOTA1,
+			'2' : MOTA2,
+			'PWM' : MOTAPWM
+			},
+		'2' : {
+			'1' : MOTB1,
+			'2' : MOTB2,
+			'PWM' : MOTBPWM
+			}
+		}
+
+# # Blink the Ready light, perfect first test
 def blink():
 	GPIO.output(READY, GPIO.LOW)
 	sleep(1)
 	GPIO.output(READY, GPIO.HIGH)
 	sleep(1)
 
-def motor1(value):
-	Error = False
-	while True:
-		try:
-			value = int(value)
-			break
-		except:
-			Error = True
-			print "Motor 1: Please enter a number - " + value + " isn't valid"
-			break
-	while Error != True:
+def _set_motor(index, value):
+	try:
+		value = int(value)
 		if -100 <= value <= 100:
-			break
+			if value > 0:
+				GPIO.output(_MOTORS[index]['1'], GPIO.HIGH)
+				GPIO.output(_MOTORS[index]['2'], GPIO.LOW)
+				_MOTORS[index]['PWM'].ChangeDutyCycle(value)
+			elif value < 0:
+				GPIO.output(_MOTORS[index]['1'], GPIO.LOW)
+				GPIO.output(_MOTORS[index]['2'], GPIO.HIGH)
+				_MOTORS[index]['PWM'].ChangeDutyCycle(abs(value))
+			else:
+				GPIO.output(_MOTORS[index]['1'], GPIO.LOW)
+				GPIO.output(_MOTORS[index]['2'], GPIO.LOW)
+				_MOTORS[index]['PWM'].ChangeDutyCycle(0)
 		else:
-			print "Motor 1: Number must be between -100 and 100 - '" + str(value) + "' isn't valid"
-			Error = True
-			break
-	
-	if Error != True:
-		if value > 0:
-			#print "Forward"
-			GPIO.output(MOTA1, GPIO.HIGH)
-			GPIO.output(MOTA2, GPIO.LOW)
-			MOTAPWM.ChangeDutyCycle(value)
-		elif value < 0:
-			#print "Backwards"
-			GPIO.output(MOTA1, GPIO.LOW)
-			GPIO.output(MOTA2, GPIO.HIGH)
-			MOTAPWM.ChangeDutyCycle(abs(value))
-		else:
-			#print "Stopped"
-			GPIO.output(MOTA1, GPIO.LOW)
-			GPIO.output(MOTA2, GPIO.LOW)
-			MOTAPWM.ChangeDutyCycle(0)
+			print "Motor " + index + ": Number must be between -100 and 100 - '" + str(value) + "' isn't valid"
+	except:
+		print "Motor " + index + ": Please enter a number - " + value + " isn't valid"
+
+def motor1(value):
+	_set_motor('1', value);
 
 def motor2(value):
-	Error = False
-	while True:
-		try:
-			value = int(value)
-			break
-		except:
-			Error = True
-			print "Motor 2: Please enter a number - " + value + " isn't valid"
-			break
-	while Error != True:
-		if -100 <= value <= 100:
-			break
-		else:
-			print "Motor 2: Number must be between -100 and 100 - '" + str(value) + "' isn't valid"
-			Error = True
-			break
-	
-	if Error != True:
-		if value > 0:
-			#print "Forward"
-			GPIO.output(MOTB1, GPIO.HIGH)
-			GPIO.output(MOTB2, GPIO.LOW)
-			MOTBPWM.ChangeDutyCycle(value)
-		elif value < 0:
-			#print "Backwards"
-			GPIO.output(MOTB1, GPIO.LOW)
-			GPIO.output(MOTB2, GPIO.HIGH)
-			MOTBPWM.ChangeDutyCycle(abs(value))
-		else:
-			#print "Stopped"
-			GPIO.output(MOTB1, GPIO.LOW)
-			GPIO.output(MOTB2, GPIO.LOW)
-			MOTBPWM.ChangeDutyCycle(0)
+	_set_motor('2', value);
 
 
 def out1(value):
