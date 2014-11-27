@@ -95,6 +95,11 @@ _OUTPUTS = {'1' : {
 			}
 		}
 
+_INPUTS = {
+		'1' : IN1,
+		'2' : IN2
+		}
+
 # # Blink the Ready light, perfect first test
 def blink():
 	GPIO.output(READY, GPIO.LOW)
@@ -143,18 +148,14 @@ def out1(value):
 def out2(value):
 	_set_output('2', value)
 
+def _read_input(index):
+	return GPIO.input(_INPUTS[index])
+
 def in1():
-	if GPIO.input(IN1):
-		return True
-	else:
-		return False
+	return _read_input('1')
 
 def in2():
-	if GPIO.input(IN2):
-		return True
-	else:
-		return False
-
+	return _read_input('2')
 
 def servo1(value):
 	Error = False
