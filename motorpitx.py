@@ -157,55 +157,26 @@ def in1():
 def in2():
 	return _read_input('2')
 
-def servo1(value):
-	Error = False
-	while True:
-		try:
-			value = int(value)
-			break
-		except:
-			Error = True
-			print "Servo 1: Please enter a number - " + value + " isn't valid"
-			break
-	while Error != True:
+def _set_servo(index, value):
+	try:
+		value = int(value)
+		servo_id = int(index) - 1
 		if 0 <= value <= 180:
-			break
+			servo = "echo " + str(servo_id) + "=%d > /dev/servoblaster" % value
+			os.system(servo)
+			sleep(0.2)
+			servo = "echo " + str(servo_id) + "=0 > /dev/servoblaster"
+			os.system(servo)
 		else:
-			print "Servo 1: Number must be between 0 and 180 - '" + str(value) + "' isn't valid"
-			Error = True
-			break
-	
-	if Error != True:
-		servo = "echo 0=%d > /dev/servoblaster" % value
-		os.system(servo)
-		sleep(0.2)
-		servo = "echo 0=0 > /dev/servoblaster"
-		os.system(servo)
+			print "Servo " + index + ": Number must be between 0 and 180 - '" + str(value) + "' isn't valid"
+	except:
+		print "Servo " + index + ": Please enter a number - " + value + " isn't valid"
+
+def servo1(value):
+	_set_servo('1', value)
 
 def servo2(value):
-	Error = False
-	while True:
-		try:
-			value = int(value)
-			break
-		except:
-			Error = True
-			print "Servo 2: Please enter a number - " + value + " isn't valid"
-			break
-	while Error != True:
-		if 0 <= value <= 180:
-			break
-		else:
-			print "Servo 2: Number must be between 0 and 180 - '" + str(value) + "' isn't valid"
-			Error = True
-			break
-	
-	if Error != True:
-		servo = "echo 1=%d > /dev/servoblaster" % value
-		os.system(servo)
-		sleep(0.2)
-		servo = "echo 1=0 > /dev/servoblaster"
-		os.system(servo)
+	_set_servo('2', value)
 		
 def cleanup():
 	GPIO.cleanup()
